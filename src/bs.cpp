@@ -42,4 +42,8 @@ double gamma(double S, double K, double r, double sigma, double T) {
     return norm_pdf(d1(S, K, r, sigma, T)) / (S * sigma * std::sqrt(T));
 }
 
+double vega(double S, double K, double r, double sigma, double T) {
+    return S * norm_pdf(d1(S, K, r, sigma, T)) * std::sqrt(T);
+}
+
 }  // namespace bs

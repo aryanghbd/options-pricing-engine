@@ -20,4 +20,8 @@ double delta_put(double S, double K, double r, double sigma, double T);
 // Gamma: change in delta per $1 change in spot (same for call and put).
 double gamma(double S, double K, double r, double sigma, double T);
 
+// Vega: change in option price per 1.00 change in sigma (divide by 100 for
+// "per vol point"). Same for call and put.
+double vega(double S, double K, double r, double sigma, double T);
+
 }  // namespace bs
