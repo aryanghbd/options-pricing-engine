@@ -24,4 +24,9 @@ double gamma(double S, double K, double r, double sigma, double T);
 // "per vol point"). Same for call and put.
 double vega(double S, double K, double r, double sigma, double T);
 
+// Theta: change in option price per year of calendar time passing
+// (i.e. -dPrice/dT). Divide by 365 for "per day".
+double theta_call(double S, double K, double r, double sigma, double T);
+double theta_put(double S, double K, double r, double sigma, double T);
+
 }  // namespace bs

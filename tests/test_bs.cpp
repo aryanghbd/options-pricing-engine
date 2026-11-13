@@ -41,5 +41,11 @@ int main() {
     const double fd_vega_put = (bs::put(S, K, r, sigma + h, T) - bs::put(S, K, r, sigma - h, T)) / (2 * h);
     check(std::fabs(bs::vega(S, K, r, sigma, T) - fd_vega_call) < 1e-6, "vega matches finite difference (call)");
     check(std::fabs(bs::vega(S, K, r, sigma, T) - fd_vega_put) < 1e-6, "vega matches finite difference (put)");
+
+    // Theta is minus the derivative with respect to time remaining.
+    const double fd_theta_call = -(bs::call(S, K, r, sigma, T + h) - bs::call(S, K, r, sigma, T - h)) / (2 * h);
+    const double fd_theta_put = -(bs::put(S, K, r, sigma, T + h) - bs::put(S, K, r, sigma, T - h)) / (2 * h);
+    check(std::fabs(bs::theta_call(S, K, r, sigma, T) - fd_theta_call) < 1e-6, "theta matches finite difference (call)");
+    check(std::fabs(bs::theta_put(S, K, r, sigma, T) - fd_theta_put) < 1e-6, "theta matches finite difference (put)");
     return 0;
 }

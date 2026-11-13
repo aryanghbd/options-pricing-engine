@@ -46,4 +46,21 @@ double vega(double S, double K, double r, double sigma, double T) {
     return S * norm_pdf(d1(S, K, r, sigma, T)) * std::sqrt(T);
 }
 
+namespace {
+// Decay term shared by call and put theta.
+double theta_decay(double S, double K, double r, double sigma, double T) {
+    return -S * norm_pdf(d1(S, K, r, sigma, T)) * sigma / (2.0 * std::sqrt(T));
+}
+}  // namespace
+
+double theta_call(double S, double K, double r, double sigma, double T) {
+    const double D2 = d1(S, K, r, sigma, T) - sigma * std::sqrt(T);
+    return theta_decay(S, K, r, sigma, T) - r * K * std::exp(-r * T) * norm_cdf(D2);
+}
+
+double theta_put(double S, double K, double r, double sigma, double T) {
+    const double D2 = d1(S, K, r, sigma, T) - sigma * std::sqrt(T);
+    return theta_decay(S, K, r, sigma, T) + r * K * std::exp(-r * T) * norm_cdf(-D2);
+}
+
 }  // namespace bs
