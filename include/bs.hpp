@@ -29,4 +29,9 @@ double vega(double S, double K, double r, double sigma, double T);
 double theta_call(double S, double K, double r, double sigma, double T);
 double theta_put(double S, double K, double r, double sigma, double T);
 
+// Rho: change in option price per 1.00 change in r (divide by 100 for
+// "per percentage point").
+double rho_call(double S, double K, double r, double sigma, double T);
+double rho_put(double S, double K, double r, double sigma, double T);
+
 }  // namespace bs

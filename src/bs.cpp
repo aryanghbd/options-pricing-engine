@@ -63,4 +63,14 @@ double theta_put(double S, double K, double r, double sigma, double T) {
     return theta_decay(S, K, r, sigma, T) + r * K * std::exp(-r * T) * norm_cdf(-D2);
 }
 
+double rho_call(double S, double K, double r, double sigma, double T) {
+    const double D2 = d1(S, K, r, sigma, T) - sigma * std::sqrt(T);
+    return K * T * std::exp(-r * T) * norm_cdf(D2);
+}
+
+double rho_put(double S, double K, double r, double sigma, double T) {
+    const double D2 = d1(S, K, r, sigma, T) - sigma * std::sqrt(T);
+    return -K * T * std::exp(-r * T) * norm_cdf(-D2);
+}
+
 }  // namespace bs

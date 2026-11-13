@@ -47,5 +47,13 @@ int main() {
     const double fd_theta_put = -(bs::put(S, K, r, sigma, T + h) - bs::put(S, K, r, sigma, T - h)) / (2 * h);
     check(std::fabs(bs::theta_call(S, K, r, sigma, T) - fd_theta_call) < 1e-6, "theta matches finite difference (call)");
     check(std::fabs(bs::theta_put(S, K, r, sigma, T) - fd_theta_put) < 1e-6, "theta matches finite difference (put)");
+
+    // Rho vs. a central finite difference in r.
+    const double fd_rho_call = (bs::call(S, K, r + h, sigma, T) - bs::call(S, K, r - h, sigma, T)) / (2 * h);
+    const double fd_rho_put = (bs::put(S, K, r + h, sigma, T) - bs::put(S, K, r - h, sigma, T)) / (2 * h);
+    check(std::fabs(bs::rho_call(S, K, r, sigma, T) - fd_rho_call) < 1e-6, "rho matches finite difference (call)");
+    check(std::fabs(bs::rho_put(S, K, r, sigma, T) - fd_rho_put) < 1e-6, "rho matches finite difference (put)");
+    check(std::fabs(bs::rho_call(S, K, r, sigma, T) - bs::rho_put(S, K, r, sigma, T) - K * T * std::exp(-r * T)) < 1e-9,
+          "call rho - put rho = K*T*exp(-rT)");
     return 0;
 }
