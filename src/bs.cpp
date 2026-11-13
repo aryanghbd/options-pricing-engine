@@ -8,6 +8,10 @@ double norm_cdf(double x) {
     return 0.5 * std::erfc(-x / std::sqrt(2.0));
 }
 
+double norm_pdf(double x) {
+    return std::exp(-0.5 * x * x) / std::sqrt(2.0 * M_PI);
+}
+
 namespace {
 double d1(double S, double K, double r, double sigma, double T) {
     return (std::log(S / K) + (r + 0.5 * sigma * sigma) * T) / (sigma * std::sqrt(T));
@@ -32,6 +36,10 @@ double delta_call(double S, double K, double r, double sigma, double T) {
 
 double delta_put(double S, double K, double r, double sigma, double T) {
     return norm_cdf(d1(S, K, r, sigma, T)) - 1.0;
+}
+
+double gamma(double S, double K, double r, double sigma, double T) {
+    return norm_pdf(d1(S, K, r, sigma, T)) / (S * sigma * std::sqrt(T));
 }
 
 }  // namespace bs

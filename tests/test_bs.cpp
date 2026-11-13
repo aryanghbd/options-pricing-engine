@@ -27,5 +27,13 @@ int main() {
     check(std::fabs(bs::delta_put(S, K, r, sigma, T) - fd_put) < 1e-6, "put delta matches finite difference");
     check(std::fabs(bs::delta_call(S, K, r, sigma, T) - bs::delta_put(S, K, r, sigma, T) - 1.0) < 1e-12,
           "call delta - put delta = 1");
+
+    // Gamma vs. a central finite difference of delta.
+    const double fd_gamma = (bs::delta_call(S + h, K, r, sigma, T) - bs::delta_call(S - h, K, r, sigma, T)) / (2 * h);
+    check(std::fabs(bs::gamma(S, K, r, sigma, T) - fd_gamma) < 1e-6, "gamma matches finite difference of delta");
+    check(std::fabs(bs::gamma(S, K, r, sigma, T) -
+                    ((bs::put(S + 1.0, K, r, sigma, T) - 2 * bs::put(S, K, r, sigma, T) +
+                      bs::put(S - 1.0, K, r, sigma, T)))) < 1e-3,
+          "gamma matches second difference of put price");
     return 0;
 }
