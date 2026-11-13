@@ -18,5 +18,14 @@ int main() {
     check(std::fabs(c - 10.4506) < 1e-3, "call matches hand calc (~10.45)");
     check(std::fabs((c - p) - (S - K * std::exp(-r * T))) < 1e-9, "put-call parity");
     check(std::fabs(bs::norm_cdf(0.0) - 0.5) < 1e-12, "N(0) = 0.5");
+
+    // Delta vs. a central finite difference of the price.
+    const double h = 1e-4;
+    const double fd_call = (bs::call(S + h, K, r, sigma, T) - bs::call(S - h, K, r, sigma, T)) / (2 * h);
+    const double fd_put = (bs::put(S + h, K, r, sigma, T) - bs::put(S - h, K, r, sigma, T)) / (2 * h);
+    check(std::fabs(bs::delta_call(S, K, r, sigma, T) - fd_call) < 1e-6, "call delta matches finite difference");
+    check(std::fabs(bs::delta_put(S, K, r, sigma, T) - fd_put) < 1e-6, "put delta matches finite difference");
+    check(std::fabs(bs::delta_call(S, K, r, sigma, T) - bs::delta_put(S, K, r, sigma, T) - 1.0) < 1e-12,
+          "call delta - put delta = 1");
     return 0;
 }

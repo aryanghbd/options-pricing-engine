@@ -26,4 +26,12 @@ double put(double S, double K, double r, double sigma, double T) {
     return K * std::exp(-r * T) * norm_cdf(-D2) - S * norm_cdf(-D1);
 }
 
+double delta_call(double S, double K, double r, double sigma, double T) {
+    return norm_cdf(d1(S, K, r, sigma, T));
+}
+
+double delta_put(double S, double K, double r, double sigma, double T) {
+    return norm_cdf(d1(S, K, r, sigma, T)) - 1.0;
+}
+
 }  // namespace bs

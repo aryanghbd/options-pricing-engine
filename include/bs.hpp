@@ -10,4 +10,8 @@ double norm_cdf(double x);
 double call(double S, double K, double r, double sigma, double T);
 double put(double S, double K, double r, double sigma, double T);
 
+// Delta: change in option price per $1 change in spot.
+double delta_call(double S, double K, double r, double sigma, double T);
+double delta_put(double S, double K, double r, double sigma, double T);
+
 }  // namespace bs
