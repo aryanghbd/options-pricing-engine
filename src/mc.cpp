@@ -3,12 +3,17 @@
 #include <algorithm>
 #include <cmath>
 #include <random>
+#include <stdexcept>
+
+#include "bs.hpp"
 
 namespace bs {
 
 namespace {
 McResult simulate(double S, double K, double r, double sigma, double T, long N,
                   std::uint64_t seed, bool is_call) {
+    validate_inputs(S, K, r, sigma, T);
+    if (N < 2) throw std::invalid_argument("N must be >= 2");
     std::mt19937_64 rng(seed);
     std::normal_distribution<double> norm(0.0, 1.0);
 

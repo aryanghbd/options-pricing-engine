@@ -1,6 +1,8 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <limits>
+#include <stdexcept>
 
 #include "bs.hpp"
 #include "mc.hpp"
@@ -8,6 +10,18 @@
 static void check(bool ok, const char* what) {
     std::printf("%s: %s\n", ok ? "PASS" : "FAIL", what);
     if (!ok) std::exit(1);
+}
+
+template <typename Ex, typename F>
+static bool throws(F f) {
+    try {
+        f();
+    } catch (const Ex&) {
+        return true;
+    } catch (...) {
+        return false;
+    }
+    return false;
 }
 
 int main() {
@@ -64,5 +78,32 @@ int main() {
     check(std::fabs(mc_p.price - p) < 4 * mc_p.std_error, "Monte Carlo put within 4 SE of closed form");
     check(bs::mc_call(S, K, r, sigma, T, 1000, 7).price == bs::mc_call(S, K, r, sigma, T, 1000, 7).price,
           "Monte Carlo is reproducible for a fixed seed");
+
+    // Degenerate cases return limit values.
+    check(bs::call(110, 100, r, sigma, 0.0) == 10.0 && bs::put(110, 100, r, sigma, 0.0) == 0.0,
+          "T=0 call/put are intrinsic (ITM call)");
+    check(bs::call(90, 100, r, sigma, 0.0) == 0.0 && bs::put(90, 100, r, sigma, 0.0) == 10.0,
+          "T=0 call/put are intrinsic (ITM put)");
+    check(std::fabs(bs::call(110, 100, r, sigma, 1e-8) - 10.0) < 1e-3, "price is continuous as T -> 0");
+    check(std::fabs(bs::call(S, K, r, 0.0, T) - std::max(S - K * std::exp(-r * T), 0.0)) < 1e-12,
+          "sigma=0 call is the deterministic forward value");
+    check(std::fabs(bs::call(S, K, r, 1e-9, T) - bs::call(S, K, r, 0.0, T)) < 1e-6,
+          "price is continuous as sigma -> 0");
+
+    // Invalid inputs throw invalid_argument.
+    const double nan = std::numeric_limits<double>::quiet_NaN();
+    check(throws<std::invalid_argument>([&] { bs::call(0, K, r, sigma, T); }), "S=0 throws");
+    check(throws<std::invalid_argument>([&] { bs::put(S, -1, r, sigma, T); }), "K<0 throws");
+    check(throws<std::invalid_argument>([&] { bs::call(S, K, r, -0.1, T); }), "sigma<0 throws");
+    check(throws<std::invalid_argument>([&] { bs::put(S, K, r, sigma, -1); }), "T<0 throws");
+    check(throws<std::invalid_argument>([&] { bs::call(S, K, nan, sigma, T); }), "NaN input throws");
+    check(throws<std::invalid_argument>([&] { bs::mc_call(S, K, r, sigma, T, 1); }), "Monte Carlo N<2 throws");
+    check(!throws<std::invalid_argument>([&] { bs::call(S, K, -0.01, sigma, T); }), "negative r is allowed");
+
+    // Greeks are undefined at T=0 or sigma=0.
+    check(throws<std::domain_error>([&] { bs::delta_call(S, K, r, sigma, 0.0); }), "delta at T=0 throws");
+    check(throws<std::domain_error>([&] { bs::gamma(S, K, r, 0.0, T); }), "gamma at sigma=0 throws");
+    check(throws<std::domain_error>([&] { bs::rho_put(S, K, r, sigma, 0.0); }), "rho at T=0 throws");
+    check(throws<std::invalid_argument>([&] { bs::vega(S, K, r, -0.2, T); }), "greeks reject invalid inputs");
     return 0;
 }

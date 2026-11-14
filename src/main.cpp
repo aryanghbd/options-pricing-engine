@@ -2,11 +2,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 
 #include "bs.hpp"
 #include "mc.hpp"
 
-int main(int argc, char** argv) {
+static int run(int argc, char** argv) {
     const bool mc = argc == 7 && std::strcmp(argv[6], "mc") == 0;
     if (argc != 6 && !mc) {
         std::fprintf(stderr, "usage: %s S K r sigma T [mc]\n", argv[0]);
@@ -21,6 +22,11 @@ int main(int argc, char** argv) {
     const double c = bs::call(S, K, r, sigma, T);
     const double p = bs::put(S, K, r, sigma, T);
     std::printf("call: %.4f\nput:  %.4f\n", c, p);
+
+    if (T == 0.0 || sigma == 0.0) {
+        std::printf("\n(greeks undefined for T = 0 or sigma = 0)\n");
+        return 0;
+    }
 
     // Trader units: vega per vol point, theta per day, rho per rate point.
     std::printf("\n%-8s %10s %10s\n", "greek", "call", "put");
@@ -46,4 +52,13 @@ int main(int argc, char** argv) {
         }
     }
     return 0;
+}
+
+int main(int argc, char** argv) {
+    try {
+        return run(argc, argv);
+    } catch (const std::exception& e) {
+        std::fprintf(stderr, "error: %s\n", e.what());
+        return 1;
+    }
 }
