@@ -3,6 +3,7 @@
 #include <cstdlib>
 
 #include "bs.hpp"
+#include "mc.hpp"
 
 static void check(bool ok, const char* what) {
     std::printf("%s: %s\n", ok ? "PASS" : "FAIL", what);
@@ -55,5 +56,13 @@ int main() {
     check(std::fabs(bs::rho_put(S, K, r, sigma, T) - fd_rho_put) < 1e-6, "rho matches finite difference (put)");
     check(std::fabs(bs::rho_call(S, K, r, sigma, T) - bs::rho_put(S, K, r, sigma, T) - K * T * std::exp(-r * T)) < 1e-9,
           "call rho - put rho = K*T*exp(-rT)");
+
+    // Monte Carlo (fixed seed) should land within 4 standard errors of the closed form.
+    const bs::McResult mc_c = bs::mc_call(S, K, r, sigma, T, 1000000);
+    const bs::McResult mc_p = bs::mc_put(S, K, r, sigma, T, 1000000);
+    check(std::fabs(mc_c.price - c) < 4 * mc_c.std_error, "Monte Carlo call within 4 SE of closed form");
+    check(std::fabs(mc_p.price - p) < 4 * mc_p.std_error, "Monte Carlo put within 4 SE of closed form");
+    check(bs::mc_call(S, K, r, sigma, T, 1000, 7).price == bs::mc_call(S, K, r, sigma, T, 1000, 7).price,
+          "Monte Carlo is reproducible for a fixed seed");
     return 0;
 }
